@@ -20,8 +20,12 @@ class _DataStoragePageState extends State<DataStoragePage> {
       const Duration(seconds: 1),
       () => showDialog(
           context: context,
-          builder: (context) =>
-              const CustomDialogue(message: 'Feature coming soon!!')),
+          builder: (context) => CustomDialogue(
+                message: 'Feature coming soon!!',
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              )),
     );
     super.didChangeDependencies();
   }

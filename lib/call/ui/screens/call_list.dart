@@ -9,6 +9,7 @@ import '../../../contact/ui/screens/add_new_contact_screen.dart';
 import '../../../shared/constants/textstyle.dart';
 import '../../../shared/constants/url_constants.dart';
 import '../../../shared/ui/widgets/custom_app_bar.dart';
+import '../../../shared/ui/widgets/custom_snack_bar.dart';
 import '../../../util/custom_navigation.dart';
 
 class CallListPage extends StatefulWidget {
@@ -44,7 +45,9 @@ class _CallListPageState extends State<CallListPage> {
             Icons.search,
             size: 24.sp,
           ),
-          onPressed: () {},
+          onPressed: () {
+            showCustomSnackBar(context);
+          },
         )
       ]),
       body: Column(
@@ -59,20 +62,20 @@ class _CallListPageState extends State<CallListPage> {
                 ]),
             child: Column(
               children: [
-                ListTile(
-                  onTap: () {
-                    customNavigator(context, const CreateNewGroupScreen());
-                  },
-                  title: Text(
-                    'New group call',
-                    style: text1,
-                  ),
-                  leading: Icon(
-                    Icons.group_add,
-                    size: 24.sp,
-                    color: Colors.black,
-                  ),
-                ),
+                // ListTile(
+                //   onTap: () {
+                //     customNavigator(context, const CreateNewGroupScreen());
+                //   },
+                //   title: Text(
+                //     'New group call',
+                //     style: text1,
+                //   ),
+                //   leading: Icon(
+                //     Icons.group_add,
+                //     size: 24.sp,
+                //     color: Colors.black,
+                //   ),
+                // ),
                 ListTile(
                   onTap: () =>
                       customNavigator(context, const AddNewContactScreen()),

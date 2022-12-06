@@ -16,12 +16,14 @@ class AuthRepo {
       PhoneCodeSent codeSent,
       PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout) async {
     try {
+     
       await _firebaseAuth.verifyPhoneNumber(
           phoneNumber: phoneNumber,
           verificationCompleted: verificationCompleted,
           verificationFailed: verificationFailed,
           codeSent: codeSent,
           codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
+           print('otp sent');
     } on FirebaseAuthException catch (e) {
       print(e.message);
       rethrow;

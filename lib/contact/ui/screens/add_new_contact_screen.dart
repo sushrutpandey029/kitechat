@@ -106,6 +106,7 @@ class _AddNewContactScreenState extends State<AddNewContactScreen> {
           .finalContacts
           .where((element) => element.userPhoneNumber == widget.number)
           .first;
+          //todo: pop until reach home
       context
           .read<ChatTProvider>()
           .selectUser(context, 0, true, userModel, isscanned: true);

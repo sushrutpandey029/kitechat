@@ -63,6 +63,8 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
         result = scanData;
         if (result != null) {
           controller.pauseCamera();
+          Navigator.pop(context);
+          Navigator.pop(context);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

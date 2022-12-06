@@ -111,6 +111,7 @@ class _ForwardChatScreenState extends State<ForwardChatScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                       onTap: () async {
+                        //todo : remove this 
                         value.selectUser(
                             context,
                             index,
@@ -144,13 +145,13 @@ class _ForwardChatScreenState extends State<ForwardChatScreen> {
                             userReceiverName: value.selectedUser!.userName,
                             userReceiverRegNo: value.selectedUser!.userRegNo,
                             userReceiverNumber: value.selectedUser!.userPhoneNo,
-                            textMessage: type == 'text' ? message : '',
+                            textMessage: type == 'text' ? this.widget.message : '',
                             emojiMessage: '',
-                            imageMessage: type == 'image' ? message : '',
-                            fileMessage: type == 'file' ? message : '',
-                            audioMessage: type == 'audio' ? message : '',
-                            location: type == 'location' ? message : '',
-                            contact: type == 'conatact' ? message : '');
+                            imageMessage: type == 'image' ?  this.widget.message : '',
+                            fileMessage: type == 'file' ?  this.widget.message : '',
+                            audioMessage: type == 'audio' ?  this.widget.message : '',
+                            location: type == 'location' ?  this.widget.message : '',
+                            contact: type == 'conatact' ?  this.widget.message : '');
                         await value.sendMessage(chatModel);
                         final msg = {
                           "text_masseg": chatModel.textMessage,

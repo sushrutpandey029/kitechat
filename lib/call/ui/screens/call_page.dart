@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:agora_uikit/agora_uikit.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,7 @@ import '../../../chat/model/chat_user_model.dart';
 import '../../../chat/model/send_message_model.dart';
 import '../../../chat/provider/chat_provider.dart';
 import '../../../chat/provider/chat_t_provider.dart';
+import 'provider/video_call_provider.dart';
 
 enum CallStatus { calling, accepted, ringing }
 
@@ -41,7 +43,7 @@ class _CallPageState extends State<CallPage> {
   // final AgoraTokenRepo _tokenRepo = AgoraTokenRepo();
   final AgoraClient agoraClient = AgoraClient(
     agoraConnectionData: AgoraConnectionData(
-      // uid: int.parse(authusermodel.id),
+      // uid: int.parse( context.read<AuthProvider>().authUserModel!.id),
       appId: 'a0999c11fe3b4b1a988fe04850510fb9',
       channelName: 'test',
     ),
@@ -55,6 +57,7 @@ class _CallPageState extends State<CallPage> {
   void initState() {
     callStatus = widget.callStatus ?? CallStatus.calling;
     isvideo = widget.isvideo;
+
     // getcalluser();
     initialiseSignals();
 
@@ -62,6 +65,7 @@ class _CallPageState extends State<CallPage> {
   }
 
   void initAgora() async {
+   
     await agoraClient.initialize();
   }
   // getcalluser() async {
@@ -156,8 +160,8 @@ class _CallPageState extends State<CallPage> {
         widget.socket!.emit("send-msg", msg);
         Provider.of<ChatTProvider>(context, listen: false)
             .addmessages(ChatModel.fromMap(msg));
-        await context.read<ChatTProvider>().sendMessage(chatModel);
         await agoraClient.sessionController.value.engine!.disableVideo();
+        await context.read<ChatTProvider>().sendMessage(chatModel);
       }
 
       try {
@@ -184,41 +188,103 @@ class _CallPageState extends State<CallPage> {
     });
   }
 
+  int createUniqueId() {
+    return DateTime.now().millisecondsSinceEpoch.remainder(100000);
+  }
+
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            contentPadding: const EdgeInsets.all(30),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Text('Are you sure?'),
+            content: const Text('Do you want to disconnect from the call'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () async {
+                  await AwesomeNotifications().createNotification(
+                    content: NotificationContent(
+                      actionType: ActionType.Default,
+                      id: createUniqueId(),
+                      channelKey: 'call_channel',
+                      payload: {
+                        "callNumber" : widget.calleeNumber,
+                        "isVideo" : widget.isvideo.toString()
+                      },
+                      title:
+                          'Ongoing Call from ${widget.calleeDeatails?.userName} ',
+                      notificationLayout: NotificationLayout.Default,
+                      color: Colors.teal,
+                    ),
+                  );
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop(true);
+                  Navigator.of(context).pop(true);
+                  await agoraClient.sessionController.value.engine
+                      ?.leaveChannel();
+                  if (agoraClient
+                      .sessionController.value.connectionData!.rtmEnabled) {
+                    await agoraClient.sessionController.value.agoraRtmChannel
+                        ?.leave();
+                    await agoraClient.sessionController.value.agoraRtmClient
+                        ?.logout();
+                  }
+                  // await value.agoraClient?.sessionController.value.engine
+                  //     ?.destroy;
+                },
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Stack(children: [
-              AgoraVideoViewer(
-                client: agoraClient,
-                disabledVideoWidget: Container(
-                  color: Colors.black,
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/people_logo.png',
+          : WillPopScope(
+              onWillPop: () => _onWillPop(),
+              child: Stack(children: [
+                AgoraVideoViewer(
+                  client: agoraClient,
+                  disabledVideoWidget: Container(
+                    color: Colors.black,
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/people_logo.png',
+                      ),
                     ),
                   ),
                 ),
-              ),
-              AgoraVideoButtons(
-                client: agoraClient,
-                enabledButtons: isvideo
-                    ? [
-                        BuiltInButtons.callEnd,
-                        BuiltInButtons.switchCamera,
-                        BuiltInButtons.toggleCamera,
-                        BuiltInButtons.toggleMic,
-                      ]
-                    : [
-                        BuiltInButtons.callEnd,
-                        BuiltInButtons.toggleMic,
-                      ],
+                AgoraVideoButtons(
+                  client: agoraClient,
+                  enabledButtons: isvideo
+                      ? [
+                          BuiltInButtons.callEnd,
+                          BuiltInButtons.switchCamera,
+                          BuiltInButtons.toggleCamera,
+                          BuiltInButtons.toggleMic,
+                        ]
+                      : [
+                          BuiltInButtons.callEnd,
+                          BuiltInButtons.toggleMic,
+                        ],
 
-                // disconnectButtonChild: IconButton(onPressed: (){Navigator.pop(context);},icon:Icon(Icons.call_end)),),
-              )
-            ]),
+                  // disconnectButtonChild: IconButton(onPressed: (){Navigator.pop(context);},icon:Icon(Icons.call_end)),),
+                )
+              ]),
+            ),
     );
   }
 }

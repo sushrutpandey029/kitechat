@@ -151,8 +151,12 @@ class _SettingPageState extends State<SettingPage> {
                 onTap: (() {
                   showDialog(
                       context: context,
-                      builder: (context) => const CustomDialogue(
-                          message: 'Feature coming soon!!'));
+                      builder: (context) => CustomDialogue(
+                            message: 'Feature coming soon!!',
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ));
                 }),
                 title: Text(
                   languages[i],

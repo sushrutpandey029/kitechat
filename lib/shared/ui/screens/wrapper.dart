@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:kite/shared/ui/widgets/custom_snack_bar.dart';
 import 'package:provider/provider.dart';
 
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -10,6 +11,7 @@ import '../../../authentication/provider/auth_provider.dart';
 import '../../../call/ui/screens/call_list.dart';
 import '../../../chat/provider/chat_provider.dart';
 import '../../../chat/provider/chat_t_provider.dart';
+import '../../../chat/provider/group_provider.dart';
 import '../../../chat/ui/screens/chat_listing_screen.dart';
 import '../../../contact/provider/contact_provider.dart';
 import '../../../contact/ui/screens/contact_list.dart';
@@ -45,8 +47,9 @@ class _WrapperState extends State<Wrapper> with WidgetsBindingObserver {
     context
         .read<AuthProvider>()
         .getUser(authPh!.pNumber)
-        .then((value) => context.read<ChatTProvider>().fetchChatUsers(context));
-    super.initState();
+        .then((value) => context.read<ChatTProvider>().fetchChatUsers(context))
+        .then((value) => context.read<GroupProvider>().getGroupById(
+            context.read<AuthProvider>().authUserModel!.id, context));
   }
 
   @override
@@ -97,7 +100,9 @@ class _WrapperState extends State<Wrapper> with WidgetsBindingObserver {
               Icons.search,
               size: 24.sp,
             ),
-            onPressed: () {},
+            onPressed: () {
+              showCustomSnackBar(context);
+            },
           )
         ],
       ),

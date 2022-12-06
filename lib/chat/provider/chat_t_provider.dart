@@ -144,8 +144,10 @@ class ChatTProvider extends ChangeNotifier {
     notifyListeners();
     _chats.clear();
     fetchChat(context);
+    //todo: change it to pop until home screen
     if (isforwarded) {
       if (isscanned) {
+        
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => ChatScreen(
             isGroupChat: false,

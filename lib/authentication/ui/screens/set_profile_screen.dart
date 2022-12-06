@@ -387,13 +387,14 @@ class _SetProfilePageState extends State<SetProfilePage> {
                                       .updateProfile(
                                         context,
                                         userId: value.authUserModel!.id,
+                                        isFirst: true,
                                         userName: _name,
                                         userBio: _bio,
                                         userImage: imagePath,
                                         uuid: uuid,
                                         fcm: token,
-                                        userNumber: value
-                                            .authUserModel!.userPhoneNumber,
+                                        // userNumber: value
+                                        // .authUserModel!.userPhoneNumber,
                                       );
                                 }
                               } else {

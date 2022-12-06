@@ -245,13 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           borderSide:
                               BorderSide(color: Colors.black, width: 2)),
                       labelText: 'Number:',
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.edit),
-                        tooltip: 'Update user bio',
-                        onPressed: () {
-                          showNumberDialog();
-                        },
-                      ),
+                    
                     ),
                   ),
                 ),
@@ -305,11 +299,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () async {
                       await context.read<UpdateProfileProvider>().updateProfile(
                             context,
+                            isFirst: false,
                             userId:
                                 context.read<AuthProvider>().authUserModel!.id,
                             userName: isNameChanged ? _userName.text : null,
                             userBio: isBioChanged ? _bio.text : null,
-                            userNumber: isNumberChanged ? _number.text : null,
+                            // userNumber: isNumberChanged ? _number.text : null,
                             userImage: isImageChanged ? imagePath : null,
                           );
                       if (isBioChanged) {
@@ -404,11 +399,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () async {
                       await context.read<UpdateProfileProvider>().updateProfile(
                             context,
+                            
                             userId:
                                 context.read<AuthProvider>().authUserModel!.id,
+                                isFirst: false,
                             userName: isNameChanged ? _userName.text : null,
                             userBio: isBioChanged ? _bio.text : null,
-                            userNumber: isNumberChanged ? _number.text : null,
+                            // userNumber: isNumberChanged ? _number.text : null,
                             userImage: isImageChanged ? imagePath : null,
                           );
                       if (isBioChanged) {
@@ -482,10 +479,11 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () async {
                 await context.read<UpdateProfileProvider>().updateProfile(
                       context,
+    isFirst: false,
                       userId: context.read<AuthProvider>().authUserModel!.id,
                       userName: isNameChanged ? _userName.text : null,
                       userBio: isBioChanged ? _bio.text : null,
-                      userNumber: isNumberChanged ? _number.text : null,
+                      // userNumber: isNumberChanged ? _number.text : null,
                       userImage: isImageChanged ? imagePath : null,
                     );
                 if (isBioChanged) {

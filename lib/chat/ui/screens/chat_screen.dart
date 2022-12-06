@@ -27,6 +27,7 @@ import '../../model/chat_model.dart';
 import '../../model/chat_user_model.dart';
 import '../../model/send_message_model.dart';
 import '../../provider/chat_t_provider.dart';
+import '../../provider/group_provider.dart';
 import '../widgets/chat_app_bar_widget.dart';
 import '../widgets/image_view.dart';
 import '../widgets/message_tile_widget.dart';
@@ -342,257 +343,309 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: chatAppBar(context, socket),
+      appBar: chatAppBar(context, socket, widget.isGroupChat),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-        child: Consumer<ChatTProvider>(builder: (context, value, widget) {
-          return Column(
-            children: [
-              isbanner
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 8),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color.fromRGBO(155, 184, 234, 1)),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.lock),
-                            SizedBox(
-                              width: 2,
-                            ),
-                            Expanded(
-                              child: Text(
-                                'Messages and calls are end-to-end encrypted. No one outside of this chat, not even Kite, can read or listen to them.',
+        child: Consumer<GroupProvider>(builder: (context, state, widget) {
+          return Consumer<ChatTProvider>(builder: (context, value, widget) {
+            return Column(
+              children: [
+                isbanner
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 8),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color.fromRGBO(155, 184, 234, 1)),
+                          child: Row(
+                            children: const [
+                              Icon(Icons.lock),
+                              SizedBox(
+                                width: 2,
                               ),
-                            )
-                          ],
-                        ),
-                      ),
-                    )
-                  : const SizedBox(),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  dragStartBehavior: DragStartBehavior.down,
-                  reverse: true,
-                  shrinkWrap: true,
-                  itemCount: value.chats.length,
-                  padding: !istop ? null : EdgeInsets.only(top: 5.h),
-                  itemBuilder: ((context, index) {
-                    // if (value.finalChatList.length == index) {
-                    //   setState(() {
-                    //     isbanner = false;
-                    //   });
-                    // }
-                    index = value.chats.length - index - 1;
-                    return MessageTileWidget(
-                      type: findType(value.chats.elementAt(index)),
-                      message: renderMessage(value.chats.elementAt(index)),
-                      time: DateFormat.jm()
-                          .format(value.chats.elementAt(index).datetime),
-                      isByUser: value.chats.elementAt(index).senderId ==
-                          context.read<AuthProvider>().authUserModel!.id,
-                      recievernumber:
-                          value.chats.elementAt(index).receiverNumber,
-                      isContinue: index == 0 ||
-                          value.chats.elementAt(index - 1).senderId ==
-                              value.chats.elementAt(index).senderId,
-                      chatid: int.parse(value.chats.elementAt(index).id),
-                    );
-                  }),
-                ),
-              ),
-              SizedBox(
-                height: 1.h,
-              ),
-              isAttaching ? attachmenttray(value) : Container(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Material(
-                    elevation: 10,
-                    color: const Color.fromARGB(255, 210, 210, 210),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.sp),
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                            onPressed: () {
-                              setState(() {
-                                showEmoji = !showEmoji;
-                              });
-                            },
-                            icon: const Icon(Icons.emoji_emotions_outlined)),
-                        SizedBox(
-                          width: haveText ? 51.w : 43.w,
-                          child: RecordMp3.instance.status ==
-                                  RecordStatus.RECORDING
-                              ? AudioWave(
-                                  height: 32,
-                                  width: 20,
-                                  spacing: 2.5,
-                                  alignment: 'right',
-                                  animationLoop: 2,
-                                  beatRate: const Duration(milliseconds: 1000),
-                                  bars: [
-                                    AudioWaveBar(
-                                        heightFactor: 0.9,
-                                        color: Colors.lightBlueAccent),
-                                    AudioWaveBar(
-                                        heightFactor: 0.3, color: Colors.blue),
-                                    AudioWaveBar(
-                                        heightFactor: 0.5, color: Colors.black),
-                                  ],
-                                )
-                              : TextField(
-                                  maxLines: 4,
-                                  minLines: 1,
-                                  controller: messageController,
-                                  decoration: const InputDecoration(
-                                      hintText: 'Message',
-                                      border: InputBorder.none,
-                                      focusedBorder: InputBorder.none),
+                              Expanded(
+                                child: Text(
+                                  'Messages and calls are end-to-end encrypted. No one outside of this chat, not even Kite, can read or listen to them.',
                                 ),
+                              )
+                            ],
+                          ),
                         ),
-                        IconButton(
-                            onPressed: () {
-                              setState(() {
-                                isAttaching = !isAttaching;
-                              });
-                            },
-                            icon: const Icon(Icons.attach_file)),
-                        if (!haveText)
-                          if (!haveText)
-                            IconButton(
-                                onPressed: () async {
-                                  final XFile? captureImg = await ImagePicker()
-                                      .pickImage(source: ImageSource.camera);
-                                  if (captureImg != null) {
-                                    customNavigator(
-                                        context,
-                                        ImageView(
-                                          isSendImage: true,
-                                          imagefile: captureImg,
-                                          value: value,
-                                          messageController: messageController,
-                                          socket: socket,
-                                        ));
-                                  }
-                                },
-                                icon: const Icon(Icons.camera_alt_outlined)),
-                      ],
-                    ),
+                      )
+                    : const SizedBox(),
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    dragStartBehavior: DragStartBehavior.down,
+                    reverse: true,
+                    shrinkWrap: true,
+                    itemCount: this.widget.isGroupChat
+                        ? state.groupChatList.length
+                        : value.chats.length,
+                    padding: !istop ? null : EdgeInsets.only(top: 5.h),
+                    itemBuilder: ((context, index) {
+                      // if (value.finalChatList.length == index) {
+                      //   setState(() {
+                      //     isbanner = false;
+                      //   });
+                      // }
+                      if (!this.widget.isGroupChat) {
+                        index = value.chats.length - index - 1;
+                      }
+                      return this.widget.isGroupChat
+                          ? MessageTileWidget(
+                              type: 'Text',
+                              isByUser: state.groupChatList
+                                      .elementAt(index)
+                                      .senderId ==
+                                  context
+                                      .read<AuthProvider>()
+                                      .authUserModel!
+                                      .id,
+                              message: state.groupChatList
+                                  .elementAt(index)
+                                  .textMasseg,
+                              time: DateFormat.jm().format(state.groupChatList
+                                  .elementAt(index)
+                                  .datetime),
+                              isContinue: index == 0 ||
+                                  state.groupChatList
+                                          .elementAt(index - 1)
+                                          .senderId ==
+                                      state.groupChatList
+                                          .elementAt(index)
+                                          .senderId,
+                              recievernumber: "  ",
+                              chatid: int.parse(
+                                  state.groupChatList.elementAt(index).id),
+                            )
+                          : MessageTileWidget(
+                              type: findType(value.chats.elementAt(index)),
+                              message:
+                                  renderMessage(value.chats.elementAt(index)),
+                              time: DateFormat.jm().format(
+                                  value.chats.elementAt(index).datetime),
+                              isByUser: value.chats.elementAt(index).senderId ==
+                                  context
+                                      .read<AuthProvider>()
+                                      .authUserModel!
+                                      .id,
+                              recievernumber:
+                                  value.chats.elementAt(index).receiverNumber,
+                              isContinue: index == 0 ||
+                                  value.chats.elementAt(index - 1).senderId ==
+                                      value.chats.elementAt(index).senderId,
+                              chatid:
+                                  int.parse(value.chats.elementAt(index).id),
+                            );
+                    }),
                   ),
-                  if (!haveText)
-                    CircleAvatar(
-                      radius: 20.sp,
-                      child: IconButton(
-                        onPressed: () async {
-                          if (RecordMp3.instance.status ==
-                              RecordStatus.RECORDING) {
-                            stopRecord();
-                            if (recordFilePath != "") {
-                              AuthUserModel userModel =
-                                  context.read<AuthProvider>().authUserModel!;
-                              await Future.delayed(const Duration(seconds: 2),
-                                  () async {
-                                SendChatModel chatModel = SendChatModel(
-                                  userSenderId: userModel.id,
-                                  userSenderName: userModel.userName,
-                                  userSenderNumber: userModel.userPhoneNumber,
-                                  userSenderRegNo: userModel.userRegNo,
-                                  userReceiverId: value.selectedUser!.userId,
-                                  userReceiverName:
-                                      value.selectedUser!.userName,
-                                  userReceiverRegNo:
-                                      value.selectedUser!.userRegNo,
-                                  userReceiverNumber:
-                                      value.selectedUser!.userPhoneNo,
-                                  textMessage: messageController.text,
-                                  emojiMessage: "",
-                                  imageMessage: '',
-                                  fileMessage: '',
-                                  contact: '',
-                                  location: '',
-                                  audioMessage: recordFilePath!,
-                                );
-                                await value.sendAudio(chatModel);
-                                final msg = {
-                                  "text_masseg": chatModel.textMessage,
-                                  "sender_id": chatModel.userSenderId,
-                                  "reciever_id": chatModel.userReceiverId,
-                                  "sender_reg_no": chatModel.userSenderRegNo,
-                                  "sender_number": chatModel.userSenderNumber,
-                                  "sender_name": chatModel.userSenderName,
-                                  "reciever_reg_no":
-                                      chatModel.userReceiverRegNo,
-                                  "reciever_number":
-                                      chatModel.userReceiverNumber,
-                                  "reciever_name": chatModel.userReceiverName,
-                                  "mems": chatModel.emojiMessage,
-                                  "datetime": DateTime.now().toIso8601String(),
-                                  "file_msg": chatModel.imageMessage,
-                                  "voice_record_msg": chatModel.audioMessage,
-                                  "user_location": chatModel.location,
-                                  "contacts": chatModel.contact,
-                                };
-                                socket.emit("send-msg", msg);
-                                value.fetchChat(context, isfetchmedia: true);
-                              });
-                            }
-                          } else {
-                            startRecord();
-                          }
-                          setState(() {});
-                        },
-                        icon: Icon(
-                            RecordMp3.instance.status == RecordStatus.RECORDING
-                                ? Icons.stop
-                                : Icons.mic),
+                ),
+                SizedBox(
+                  height: 1.h,
+                ),
+                isAttaching ? attachmenttray(value) : Container(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Material(
+                      elevation: 10,
+                      color: const Color.fromARGB(255, 210, 210, 210),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.sp),
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  showEmoji = !showEmoji;
+                                });
+                              },
+                              icon: const Icon(Icons.emoji_emotions_outlined)),
+                          SizedBox(
+                            width: haveText ? 51.w : 43.w,
+                            child: RecordMp3.instance.status ==
+                                    RecordStatus.RECORDING
+                                ? AudioWave(
+                                    height: 32,
+                                    width: 20,
+                                    spacing: 2.5,
+                                    alignment: 'right',
+                                    animationLoop: 2,
+                                    beatRate:
+                                        const Duration(milliseconds: 1000),
+                                    bars: [
+                                      AudioWaveBar(
+                                          heightFactor: 0.9,
+                                          color: Colors.lightBlueAccent),
+                                      AudioWaveBar(
+                                          heightFactor: 0.3,
+                                          color: Colors.blue),
+                                      AudioWaveBar(
+                                          heightFactor: 0.5,
+                                          color: Colors.black),
+                                    ],
+                                  )
+                                : TextField(
+                                    maxLines: 4,
+                                    minLines: 1,
+                                    controller: messageController,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Message',
+                                        border: InputBorder.none,
+                                        focusedBorder: InputBorder.none),
+                                  ),
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isAttaching = !isAttaching;
+                                });
+                              },
+                              icon: const Icon(Icons.attach_file)),
+                          if (!haveText)
+                            if (!haveText)
+                              IconButton(
+                                  onPressed: () async {
+                                    final XFile? captureImg =
+                                        await ImagePicker().pickImage(
+                                            source: ImageSource.camera);
+                                    if (captureImg != null) {
+                                      customNavigator(
+                                          context,
+                                          ImageView(
+                                            isSendImage: true,
+                                            imagefile: captureImg,
+                                            value: value,
+                                            messageController:
+                                                messageController,
+                                            socket: socket,
+                                          ));
+                                    }
+                                  },
+                                  icon: const Icon(Icons.camera_alt_outlined)),
+                        ],
                       ),
                     ),
-                  if (haveText)
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          shape: const CircleBorder(),
-                          padding: EdgeInsets.all(14.sp)),
-                      onPressed: () {
-                        AuthUserModel userModel =
-                            context.read<AuthProvider>().authUserModel!;
+                    if (!haveText)
+                      CircleAvatar(
+                        radius: 20.sp,
+                        child: IconButton(
+                          onPressed: () async {
+                            if (RecordMp3.instance.status ==
+                                RecordStatus.RECORDING) {
+                              stopRecord();
+                              if (recordFilePath != "") {
+                                AuthUserModel userModel =
+                                    context.read<AuthProvider>().authUserModel!;
+                                await Future.delayed(const Duration(seconds: 2),
+                                    () async {
+                                  SendChatModel chatModel = SendChatModel(
+                                    userSenderId: userModel.id,
+                                    userSenderName: userModel.userName,
+                                    userSenderNumber: userModel.userPhoneNumber,
+                                    userSenderRegNo: userModel.userRegNo,
+                                    userReceiverId: value.selectedUser!.userId,
+                                    userReceiverName:
+                                        value.selectedUser!.userName,
+                                    userReceiverRegNo:
+                                        value.selectedUser!.userRegNo,
+                                    userReceiverNumber:
+                                        value.selectedUser!.userPhoneNo,
+                                    textMessage: messageController.text,
+                                    emojiMessage: "",
+                                    imageMessage: '',
+                                    fileMessage: '',
+                                    contact: '',
+                                    location: '',
+                                    audioMessage: recordFilePath!,
+                                  );
+                                  await value.sendAudio(chatModel);
+                                  final msg = {
+                                    "text_masseg": chatModel.textMessage,
+                                    "sender_id": chatModel.userSenderId,
+                                    "reciever_id": chatModel.userReceiverId,
+                                    "sender_reg_no": chatModel.userSenderRegNo,
+                                    "sender_number": chatModel.userSenderNumber,
+                                    "sender_name": chatModel.userSenderName,
+                                    "reciever_reg_no":
+                                        chatModel.userReceiverRegNo,
+                                    "reciever_number":
+                                        chatModel.userReceiverNumber,
+                                    "reciever_name": chatModel.userReceiverName,
+                                    "mems": chatModel.emojiMessage,
+                                    "datetime":
+                                        DateTime.now().toIso8601String(),
+                                    "file_msg": chatModel.imageMessage,
+                                    "voice_record_msg": chatModel.audioMessage,
+                                    "user_location": chatModel.location,
+                                    "contacts": chatModel.contact,
+                                  };
+                                  socket.emit("send-msg", msg);
+                                  value.fetchChat(context, isfetchmedia: true);
+                                });
+                              }
+                            } else {
+                              startRecord();
+                            }
+                            setState(() {});
+                          },
+                          icon: Icon(RecordMp3.instance.status ==
+                                  RecordStatus.RECORDING
+                              ? Icons.stop
+                              : Icons.mic),
+                        ),
+                      ),
+                    if (haveText)
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: const CircleBorder(),
+                            padding: EdgeInsets.all(14.sp)),
+                        onPressed: () {
+                          AuthUserModel userModel =
+                              context.read<AuthProvider>().authUserModel!;
 
-                        SendChatModel chatModel = SendChatModel(
-                            userSenderId: userModel.id,
-                            userSenderName: userModel.userName,
-                            userSenderNumber: userModel.userPhoneNumber,
-                            userSenderRegNo: userModel.userRegNo,
-                            userReceiverId: value.selectedUser!.userId,
-                            userReceiverName: value.selectedUser!.userName,
-                            userReceiverRegNo: value.selectedUser!.userRegNo,
-                            userReceiverNumber: value.selectedUser!.userPhoneNo,
-                            textMessage: messageController.text,
-                            emojiMessage: "",
-                            imageMessage: '',
-                            fileMessage: '',
-                            audioMessage: '',
-                            location: '',
-                            contact: '');
-                        sendmessage(chatModel);
-                        messageController.clear();
-                        FocusScope.of(context).unfocus();
-                      },
-                      child: const Icon(Icons.send),
-                    )
-                ],
-              ),
-              showEmoji ? Expanded(child: selectEmoji()) : const SizedBox(),
-              const SizedBox(),
-            ],
-          );
+                          if (this.widget.isGroupChat) {
+                            state.sendGroupMessage(
+                                textMessage: messageController.text,
+                                context: context);
+                          } else {
+                            SendChatModel chatModel = SendChatModel(
+                                userSenderId: userModel.id,
+                                userSenderName: userModel.userName,
+                                userSenderNumber: userModel.userPhoneNumber,
+                                userSenderRegNo: userModel.userRegNo,
+                                userReceiverId: value.selectedUser!.userId,
+                                userReceiverName: value.selectedUser!.userName,
+                                userReceiverRegNo:
+                                    value.selectedUser!.userRegNo,
+                                userReceiverNumber:
+                                    value.selectedUser!.userPhoneNo,
+                                textMessage: messageController.text,
+                                emojiMessage: "",
+                                imageMessage: '',
+                                fileMessage: '',
+                                audioMessage: '',
+                                location: '',
+                                contact: '');
+                            sendmessage(chatModel);
+                          }
+                          messageController.clear();
+                          FocusScope.of(context).unfocus();
+                        },
+                        child: const Icon(Icons.send),
+                      )
+                  ],
+                ),
+                showEmoji ? Expanded(child: selectEmoji()) : const SizedBox(),
+                const SizedBox(),
+              ],
+            );
+          });
         }),
       ),
     );
@@ -738,7 +791,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: IconButton(
                   onPressed: (() async {
                     FilePickerResult? result = await FilePicker.platform
-                        .pickFiles(type: FileType.image, allowMultiple: true);
+                        .pickFiles(allowMultiple: true);
                     if (result != null) {
                       List<File> files =
                           result.paths.map((path) => File(path!)).toList();

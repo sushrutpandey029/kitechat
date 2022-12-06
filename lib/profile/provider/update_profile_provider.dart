@@ -16,10 +16,11 @@ class UpdateProfileProvider extends ChangeNotifier {
   Future<void> updateProfile(
     BuildContext context, {
     required String userId,
+    required bool isFirst,
+    // required String userNumber,
     String? userName,
     String? userBio,
     String? userImage,
-    String? userNumber,
     String? uuid,
     String? fcm,
   }) async {
@@ -35,9 +36,9 @@ class UpdateProfileProvider extends ChangeNotifier {
       if (userImage != null) {
         await _profileRepo.updateUserImage(userId, userImage);
       }
-      if (userNumber != null) {
-        await _profileRepo.updateUserNumber(userId, userNumber);
-      }
+      // if (userNumber != null) {
+      //   await _profileRepo.updateUserNumber(userId, userNumber);
+      // }
       if (uuid != null) {
         await _profileRepo.updateuuid(userId, uuid);
       }
@@ -45,11 +46,15 @@ class UpdateProfileProvider extends ChangeNotifier {
         await _profileRepo.updatefcm(userId, fcm);
       }
       if (userName != null || userBio != null || userImage != null) {
-        await context.read<AuthProvider>().getUser(userNumber!);
+        await context.read<AuthProvider>().getUser(
+            context.read<AuthProvider>().authUserModel!.userPhoneNumber);
       }
 
       isLoading = false;
       notifyListeners();
+      if (!isFirst) {
+        Navigator.pop(context);
+      }
       log('here');
     } on DioError catch (e) {
       showDialog(

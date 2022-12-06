@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -58,5 +59,26 @@ void main() async {
   };
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebaseMessaging.onBackgroundMessage(backgroundMessageHandler);
+  AwesomeNotifications().initialize(
+      // set the icon to null if you want to use the default app icon
+      null,
+      [
+        NotificationChannel(
+          channelGroupKey: 'call_channel_group',
+          channelKey: 'call_channel',
+          channelName: 'Call notifications',
+          channelDescription: 'Notification channel for call tests',
+          defaultColor: Color(0xFF9D50DD),
+          ledColor: Colors.white,
+          locked: true
+        )
+      ],
+      // Channel groups are only visual and are not required
+      channelGroups: [
+        NotificationChannelGroup(
+            channelGroupKey: 'basic_channel_group',
+            channelGroupName: 'Basic group')
+      ],
+      debug: true);
   runApp(const KiteApp());
 }

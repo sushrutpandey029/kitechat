@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class CustomDialogue extends StatelessWidget {
-  const CustomDialogue({
-    Key? key,
-    required this.message,
-  }) : super(key: key);
+  CustomDialogue({Key? key, required this.message, this.onTap})
+      : super(key: key);
 
   final String message;
+  VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +20,11 @@ class CustomDialogue extends StatelessWidget {
       actions: [
         ElevatedButton(
             onPressed: () {
+              if (onTap != null) {
+                print('go back');
+                onTap!();
+              }
+              // Navigator.pop(context);
               Navigator.pop(context);
             },
             child: const Text('OK'))

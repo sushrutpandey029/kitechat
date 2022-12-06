@@ -4,6 +4,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../../../shared/constants/textstyle.dart';
 import '../../../shared/ui/widgets/custom_dialouge.dart';
+import '../../../shared/ui/widgets/custom_snack_bar.dart';
 
 class ChatProfileScreen extends StatefulWidget {
   final String username;
@@ -21,7 +22,7 @@ class _ChatProfileScreenState extends State<ChatProfileScreen> {
       () => showDialog(
           context: context,
           builder: (context) =>
-              const CustomDialogue(message: 'Feature coming soon!!')),
+               CustomDialogue(message: 'Feature coming soon!!')),
     );
     super.didChangeDependencies();
   }
@@ -98,62 +99,68 @@ class _ChatProfileScreenState extends State<ChatProfileScreen> {
                   children: [
                     IconButton(
                         iconSize: 26.sp,
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                         icon: const Icon(
                           Icons.message,
                           color: Colors.blueAccent,
                         )),
                     IconButton(
                         iconSize: 26.sp,
-                        onPressed: () {},
+                        onPressed: () {
+                           showCustomSnackBar(context);
+                        },
                         icon: const Icon(
                           Icons.call,
                           color: Colors.blueAccent,
                         )),
                     IconButton(
                         iconSize: 28.sp,
-                        onPressed: () {},
+                        onPressed: () {
+                           showCustomSnackBar(context);
+                        },
                         icon: const Icon(
                           Icons.video_call,
                           color: Colors.blueAccent,
                         )),
                   ],
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                  child: const Text(
-                    "Can't talk Kite only",
-                    textAlign: TextAlign.left,
-                  ),
-                ),
+                // Padding(
+                //   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                //   child: const Text(
+                //     "Can't talk Kite only",
+                //     textAlign: TextAlign.left,
+                //   ),
+                // ),
               ],
             ),
           ),
           SizedBox(
             height: 2.h,
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Shared files'),
-                TextButton(onPressed: () {}, child: const Text('View more')),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 12.h,
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 6,
-                itemBuilder: (context, index) {
-                  return Card(
-                      child: FlutterLogo(
-                    size: 40.sp,
-                  ));
-                }),
-          ),
+          // Padding(
+          //   padding: EdgeInsets.symmetric(horizontal: 8.w),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //     children: [
+          //       const Text('Shared files'),
+          //       TextButton(onPressed: () {}, child: const Text('View more')),
+          //     ],
+          //   ),
+          // ),
+          // SizedBox(
+          //   height: 12.h,
+          //   child: ListView.builder(
+          //       scrollDirection: Axis.horizontal,
+          //       itemCount: 6,
+          //       itemBuilder: (context, index) {
+          //         return Card(
+          //             child: FlutterLogo(
+          //           size: 40.sp,
+          //         ));
+          //       }),
+          // ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Divider(color: Colors.black, thickness: 0.3.h),
@@ -163,7 +170,9 @@ class _ChatProfileScreenState extends State<ChatProfileScreen> {
                   foregroundColor: Colors.red,
                   backgroundColor: Colors.transparent,
                   elevation: 0),
-              onPressed: () {},
+              onPressed: () {
+                 showCustomSnackBar(context);
+              },
               icon: const Icon(Icons.report),
               label: const Text('Block')),
           ElevatedButton.icon(
@@ -171,7 +180,9 @@ class _ChatProfileScreenState extends State<ChatProfileScreen> {
                   foregroundColor: Colors.red,
                   backgroundColor: Colors.transparent,
                   elevation: 0),
-              onPressed: () {},
+              onPressed: () {
+                 showCustomSnackBar(context);
+              },
               icon: const Icon(Icons.thumb_down),
               label: const Text('Report'))
         ],

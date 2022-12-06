@@ -11,6 +11,7 @@ import '../../../settings/ui/screens/qr_scanner_screen.dart';
 import '../../../shared/constants/textstyle.dart';
 import '../../../shared/constants/url_constants.dart';
 import '../../../shared/ui/widgets/custom_app_bar.dart';
+import '../../../shared/ui/widgets/custom_snack_bar.dart';
 import '../../../util/custom_navigation.dart';
 import '../../provider/contact_provider.dart';
 import 'add_new_contact_screen.dart';
@@ -46,7 +47,9 @@ class _ContactListPageState extends State<ContactListPage> {
               Icons.search,
               size: 24.sp,
             ),
-            onPressed: () {},
+            onPressed: () {
+              showCustomSnackBar(context);
+            },
           )
         ],
       ),
